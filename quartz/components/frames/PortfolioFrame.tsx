@@ -1,5 +1,6 @@
 import { PageFrame, PageFrameProps } from "./types"
 import { simplifySlug } from "../../util/path"
+import { QuartzPluginData } from "../../plugins/vfile"
 import PortfolioNavConstructor from "../PortfolioNav"
 import PostListConstructor from "../PostList"
 import ClockConstructor from "../Clock"
@@ -31,7 +32,18 @@ const CLOCK_PAGES = ["contact"]
 const ONEKO_ENABLED = true
 const Oneko = OnekoConstructor()
 
-const FOOTER_TEXT = `🌗Powered by Quartz. Site last updated on September 2, 2026`
+const SOURCE_URL = "https://github.com/Shipi1/quartz-portfolio"
+
+function lastUpdated(allFiles: QuartzPluginData[]): Date {
+  let newest = 0
+  for (const file of allFiles) {
+    const raw = file.dates?.modified ?? file.dates?.created
+    const time = raw ? new Date(raw).getTime() : 0
+    if (time > newest) newest = time
+  }
+  // no dated pages at all: fall back to build time
+  return newest > 0 ? new Date(newest) : new Date()
+}
 
 /** Folder whose index page gets an automatic post listing appended. */
 const BLOG_FOLDER = "blog"
@@ -73,7 +85,13 @@ export const PortfolioFrame: PageFrame = {
           {footer.map((FooterComponent) => (
             <FooterComponent {...componentData} />
           ))}
-          <p>{FOOTER_TEXT}</p>
+          <p>
+            🌗 Powered by <a href={SOURCE_URL}>Quartz</a>. Site last updated on{" "}
+            {lastUpdated(componentData.allFiles).toLocaleDateString(
+              componentData.cfg.locale ?? "en-US",
+              { year: "numeric", month: "long", day: "numeric" },
+            )}
+          </p>
         </footer>
         {ONEKO_ENABLED && <Oneko {...componentData} />}
       </div>
