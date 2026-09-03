@@ -86,7 +86,13 @@ export const PortfolioFrame: PageFrame = {
             <FooterComponent {...componentData} />
           ))}
           <p>
-            🌗 Powered by <a href={SOURCE_URL}>Quartz</a>. Site last updated on{" "}
+            {/* links written in the frame are not touched by the crawl-links
+                plugin, so this one opts into a new tab explicitly */}
+            🌗 Powered by{" "}
+            <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
+              Quartz
+            </a>
+            . Site last updated on{" "}
             {lastUpdated(componentData.allFiles).toLocaleDateString(
               componentData.cfg.locale ?? "en-US",
               { year: "numeric", month: "long", day: "numeric" },
