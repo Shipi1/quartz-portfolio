@@ -6,7 +6,7 @@ configuration:
   enablePopovers: false
   analytics: null
   locale: en-US
-  baseUrl: shipi1.github.io/quartz-portfolio
+  baseUrl: shipisnature.com
   ignorePatterns:
     - private
     - templates
@@ -114,7 +114,7 @@ plugins:
   # GitHub Pages to serve the site from a custom domain that is not yours.
   # Re-enable once baseUrl is a real domain (see SITE.md, Deploying).
   - source: "@quartz-community/cname"
-    enabled: false
+    enabled: true
   - source: "@quartz-community/content-page"
     enabled: true
   # folder-page auto-generates listing pages ("N items under this folder").
