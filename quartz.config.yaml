@@ -6,7 +6,7 @@ configuration:
   enablePopovers: false
   analytics: null
   locale: en-US
-  baseUrl: example.com
+  baseUrl: shipi1.github.io/quartz-portfolio
   ignorePatterns:
     - private
     - templates
@@ -102,13 +102,18 @@ plugins:
     enabled: true
     options:
       enableSiteMap: true
-      enableRSS: true
+      # no blog to subscribe to; sitemap is still worth emitting for search engines
+      enableRSS: false
   - source: "@quartz-community/favicon"
     enabled: true
   - source: "@quartz-community/og-image"
     enabled: true
+  # Emits a CNAME file from baseUrl. Disabled while the site lives at a
+  # github.io URL: it would write "shipi1.github.io" into CNAME, which tells
+  # GitHub Pages to serve the site from a custom domain that is not yours.
+  # Re-enable once baseUrl is a real domain (see SITE.md, Deploying).
   - source: "@quartz-community/cname"
-    enabled: true
+    enabled: false
   - source: "@quartz-community/content-page"
     enabled: true
   # folder-page auto-generates listing pages ("N items under this folder").

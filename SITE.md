@@ -210,3 +210,60 @@ the page scrolls sideways, and the last nav link ends up off-screen on a
 phone. `overflow-x: clip` on the same element is a second line of defence
 against a stray wide child, and `.portfolio-main` sets `min-width: 0` and
 `overflow-wrap: break-word` so long URLs wrap rather than widen the page.
+
+## Deploying to GitHub Pages
+
+`.github/workflows/deploy.yml` builds on every push to `v5-portfolio` and
+publishes `public/` to Pages. GitHub Pages cannot build Quartz itself — it only
+builds Jekyll natively — so the Action does the build and uploads the finished
+static output.
+
+One-time setup: **Settings → Pages → Source → GitHub Actions** (not "Deploy
+from a branch"). Without this the workflow runs but nothing is published.
+
+The upstream Quartz workflows that came with the clone were deleted; they
+build Quartz's own docs and push Docker images, which is not wanted here.
+Restore them with `git checkout .github` if ever needed.
+
+### The content has to be in this repo
+
+The Action builds from a fresh checkout, so anything outside the repo does not
+exist as far as CI is concerned. Building from an Obsidian vault elsewhere on
+disk works locally via `-d`, but CI will publish an empty site. Keep the
+markdown in `content/` — pointing Obsidian at that folder is the simplest fix.
+
+### Custom domain
+
+While the site is at `shipi1.github.io/<repo>`:
+
+```yaml
+baseUrl: shipi1.github.io/<repo>     # subpath included, no https://
+- source: "@quartz-community/cname"
+  enabled: false                      # would emit a wrong CNAME file
+```
+
+When moving to a real domain, change both:
+
+```yaml
+baseUrl: shipisnature.com             # no subpath, no https://
+- source: "@quartz-community/cname"
+  enabled: true                       # now emits a correct CNAME file
+```
+
+The `cname` plugin takes the host part of `baseUrl` and writes it to
+`public/CNAME`. On GitHub Pages that file *sets* the custom domain, so an
+incorrect value takes the site down rather than being ignored.
+
+DNS at the registrar, for an apex domain:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `shipi1.github.io` |
+
+Confirm those addresses against GitHub's current Pages documentation before
+relying on them. Then set the domain under Settings → Pages, wait for the DNS
+check to pass, and enable "Enforce HTTPS" once the certificate is issued.
