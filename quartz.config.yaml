@@ -1,0 +1,215 @@
+# yaml-language-server: $schema=./quartz/plugins/quartz-plugins.schema.json
+configuration:
+  pageTitle: "Martin Arias - Audio Post & Sound Design"
+  pageTitleSuffix: ""
+  enableSPA: true
+  enablePopovers: false
+  analytics: null
+  locale: en-US
+  baseUrl: example.com
+  ignorePatterns:
+    - private
+    - templates
+    - .obsidian
+  theme:
+    fontOrigin: local
+    cdnCaching: true
+    typography:
+      header: Schibsted Grotesk
+      body: Source Sans Pro
+      code: IBM Plex Mono
+    colors:
+      # single dark palette, duplicated so the site looks identical
+      # whether or not a visitor prefers light mode
+      lightMode: &palette
+        light: "#000000"
+        lightgray: "#1e1e1e"
+        gray: "#8a8a8a"
+        darkgray: "#ffffff"
+        dark: "#ffffff"
+        secondary: "#f895ea"
+        tertiary: "#da6bcb"
+        highlight: rgba(248, 149, 234, 0.10)
+        textHighlight: "#f895ea55"
+      darkMode: *palette
+
+plugins:
+  # ---------- transformers (markdown -> html) ----------
+  - source: "@quartz-community/created-modified-date"
+    enabled: true
+    options:
+      defaultDateType: created
+      priority:
+        - frontmatter
+        - git
+        - filesystem
+    order: 10
+  - source: "@quartz-community/syntax-highlighting"
+    enabled: true
+    options:
+      theme:
+        light: github-dark
+        dark: github-dark
+      keepBackground: false
+    order: 20
+  - source: "@quartz-community/obsidian-flavored-markdown"
+    enabled: true
+    options:
+      enableInHtmlEmbed: false
+      enableCheckbox: true
+    order: 30
+  - source: "@quartz-community/github-flavored-markdown"
+    enabled: true
+    order: 40
+  - source: "@quartz-community/crawl-links"
+    enabled: true
+    options:
+      markdownLinkResolution: shortest
+    order: 60
+  - source: "@quartz-community/description"
+    enabled: true
+    order: 70
+  - source: "@quartz-community/latex"
+    enabled: true
+    options:
+      renderEngine: katex
+    order: 80
+
+  # ---------- disabled transformers ----------
+  - source: "@quartz-community/table-of-contents"
+    enabled: false
+  - source: "@quartz-community/citations"
+    enabled: false
+  # renders a single newline as <br>, matching how Obsidian displays notes
+  - source: "@quartz-community/hard-line-breaks"
+    enabled: true
+    order: 90
+  - source: "@quartz-community/ox-hugo"
+    enabled: false
+  - source: "@quartz-community/roam"
+    enabled: false
+
+  # ---------- filters / emitters ----------
+  - source: "@quartz-community/quartz-fonts"
+    enabled: true
+  - source: "@quartz-community/remove-draft"
+    enabled: true
+  - source: "@quartz-community/explicit-publish"
+    enabled: false
+  - source: "@quartz-community/alias-redirects"
+    enabled: true
+  - source: "@quartz-community/content-index"
+    enabled: true
+    options:
+      enableSiteMap: true
+      enableRSS: true
+  - source: "@quartz-community/favicon"
+    enabled: true
+  - source: "@quartz-community/og-image"
+    enabled: true
+  - source: "@quartz-community/cname"
+    enabled: true
+  - source: "@quartz-community/content-page"
+    enabled: true
+  # folder-page auto-generates listing pages ("N items under this folder").
+  # Disabled so content/blog/index.md owns /blog and the custom PostList
+  # (title + date + description) renders instead.
+  - source: "@quartz-community/folder-page"
+    enabled: false
+  # no tag index page: this site does not use tags
+  - source: "@quartz-community/tag-page"
+    enabled: false
+  - source: "@quartz-community/canvas-page"
+    enabled: false
+  - source: "@quartz-community/bases-page"
+    enabled: false
+  - source: "@quartz-community/unlisted-pages"
+    enabled: true
+    order: 45
+  - source: "@quartz-community/encrypted-pages"
+    enabled: false
+
+  # ---------- chrome: nearly all of it off ----------
+  - source: "@quartz-community/explorer"
+    enabled: false
+  - source: "@quartz-community/graph"
+    enabled: false
+  - source: "@quartz-community/search"
+    enabled: false
+  - source: "@quartz-community/backlinks"
+    enabled: false
+  - source: "@quartz-community/darkmode"
+    enabled: false
+  - source: "@quartz-community/reader-mode"
+    enabled: false
+  - source: "@quartz-community/breadcrumbs"
+    enabled: false
+  - source: "@quartz-community/page-title"
+    enabled: false
+  - source: "@quartz-community/tag-list"
+    enabled: false
+  # note-properties owns frontmatter parsing in v5 — it must stay enabled.
+  # hidePropertiesView keeps the YAML out of the rendered page.
+  - source: "@quartz-community/note-properties"
+    enabled: true
+    options:
+      includeAll: false
+      includedProperties:
+        - description
+        - tags
+        - aliases
+      excludedProperties: []
+      hidePropertiesView: true
+      delimiters: "---"
+      language: yaml
+    order: 5
+  - source: "@quartz-community/spacer"
+    enabled: false
+  - source: "@quartz-community/stacked-pages"
+    enabled: false
+  - source: "@quartz-community/comments"
+    enabled: false
+  - source: "@quartz-community/recent-notes"
+    enabled: false
+  - source: "@quartz-community/footer"
+    enabled: false
+
+  # article title stays: it renders the <h1> on posts
+  - source: "@quartz-community/article-title"
+    enabled: true
+    layout:
+      position: beforeBody
+      priority: 10
+  - source: "@quartz-community/content-meta"
+    enabled: true
+    options:
+      showReadingTime: false
+    layout:
+      position: beforeBody
+      priority: 20
+      condition: not-index
+
+layout:
+  groups: {}
+  byPageType:
+    "404":
+      template: portfolio
+      positions:
+        beforeBody: []
+        left: []
+        right: []
+    content:
+      template: portfolio
+      positions:
+        left: []
+        right: []
+    folder:
+      template: portfolio
+      positions:
+        left: []
+        right: []
+    tag:
+      template: portfolio
+      positions:
+        left: []
+        right: []

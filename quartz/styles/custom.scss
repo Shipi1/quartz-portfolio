@@ -1,3 +1,237 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+// ===========================================================================
+// Portfolio frame — a single narrow centered column on a dark ground.
+// Everything here is scoped to [data-frame="portfolio"] so the stock Quartz
+// frames keep working untouched.
+// ===========================================================================
+
+$columnWidth: 75ch;
+$accent: var(--secondary);
+
+.page[data-frame="portfolio"] {
+  & > #quartz-body {
+    display: block;
+    // border-box is load-bearing: with content-box, width:100% plus the 1rem
+    // side padding makes this 32px wider than the viewport, which pushes the
+    // last nav link off-screen on narrow displays.
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 0 1rem;
+    width: 100%;
+    max-width: $columnWidth;
+    min-height: 100vh;
+    overflow-x: clip; // last-resort guard against a stray wide child
+  }
+
+  .portfolio-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    gap: 0;
+  }
+
+  // ---- top bar: clock on the left, nav on the right ---------------------
+  .site-topbar {
+    display: flex;
+    // flex-end (not space-between) so the nav stays right-aligned on pages
+    // where the clock is not rendered; the clock claims the left via auto margin
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    // wraps to a second row rather than overflowing when space runs out
+    flex-wrap: wrap;
+    // stays reachable while scrolling long pages
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: var(--light);
+    margin: 0 0 1.5rem 0;
+    padding: 1.25rem 0 0.75rem 0;
+  }
+
+  .site-clock {
+    margin-right: auto;
+    color: var(--gray);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums; // stops the width jitter as digits change
+    white-space: nowrap;
+  }
+
+  .site-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem 10px;
+    margin: 0;
+    flex-wrap: wrap;
+
+    & a {
+      color: $accent;
+      text-decoration: none;
+      // roomier hit area for thumbs; keeps links tappable on phones
+      padding: 0.3rem 0.1rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // ---- body ------------------------------------------------------------
+  .portfolio-main {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0; // lets flex children shrink instead of forcing overflow
+    // long URLs and unbroken strings wrap instead of widening the page
+    overflow-wrap: break-word;
+  }
+
+  article {
+    & > h1:first-of-type {
+      margin-top: 0;
+    }
+
+    & a {
+      color: $accent;
+      text-decoration: none;
+      background-color: transparent;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      // strip Quartz's internal-link decorations
+      &.internal {
+        padding: 0;
+        border-radius: 0;
+        background-color: transparent;
+      }
+    }
+
+    & ul {
+      padding-left: 1.5rem;
+    }
+  }
+
+  // ---- blog listing ----------------------------------------------------
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: 2rem;
+  }
+
+  .post-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .post-link {
+    color: $accent;
+    text-decoration: none;
+    font-size: 1.1rem;
+    // Quartz gives a.internal a tinted pill background; strip it here too,
+    // since the post list renders outside <article>.
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .post-date,
+  .post-desc {
+    margin: 0;
+    color: var(--gray);
+    font-size: 0.9rem;
+  }
+
+  .post-list-empty {
+    color: var(--gray);
+  }
+
+  // ---- footer ----------------------------------------------------------
+  .portfolio-footer {
+    margin-top: 4rem;
+    padding: 2rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray);
+    font-size: 0.9rem;
+
+    & p {
+      margin: 0;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// System font stack — no webfont fetch, matches the target's plain look.
+// Quartz emits --bodyFont / --headerFont from theme.typography; override both.
+// ---------------------------------------------------------------------------
+:root {
+  --bodyFont:
+    -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --headerFont:
+    -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.page[data-frame="portfolio"] {
+  // no ↗ glyphs after outbound links
+  .external-icon {
+    display: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    margin-top: 2rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The date line (content-meta) belongs on blog posts only — not on the
+// home, blog index, or contact pages. body[data-slug] is set by Quartz.
+// ---------------------------------------------------------------------------
+.content-meta {
+  display: none;
+}
+
+body[data-slug^="blog/"] .content-meta {
+  display: block;
+  color: var(--gray);
+  margin-top: 0.25rem;
+}
+
+// ---------------------------------------------------------------------------
+// YouTube embeds. The obsidian-flavored-markdown plugin emits a fixed
+// width="600px" iframe; override it to a responsive 16:9 block so it fits
+// the content column and scales on mobile.
+// ---------------------------------------------------------------------------
+.page[data-frame="portfolio"] {
+  iframe.external-embed.youtube {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    margin: 1rem 0 1.5rem 0;
+    border: 0;
+    border-radius: 4px;
+  }
+}

@@ -13,7 +13,12 @@ export default (() => {
     ctx,
   }: QuartzComponentProps) => {
     const titleSuffix = cfg.pageTitleSuffix ?? ""
-    const title =
+    // FORK CHANGE: the browser tab title is pinned to the site name on every
+    // page. Upstream built it from the page's own frontmatter title; to restore
+    // that, set `title` to the `socialTitle` expression below.
+    const title = cfg.pageTitle
+    // kept per-page so a shared link still previews with that page's name
+    const socialTitle =
       (fileData.frontmatter?.title ?? i18n(cfg.locale).propertyDefaults.title) + titleSuffix
     const description =
       fileData.frontmatter?.socialDescription ??
@@ -61,10 +66,10 @@ export default (() => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <meta name="og:site_name" content={cfg.pageTitle}></meta>
-        <meta property="og:title" content={title} />
+        <meta property="og:title" content={socialTitle} />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
+        <meta name="twitter:title" content={socialTitle} />
         <meta name="twitter:description" content={description} />
         <meta property="og:description" content={description} />
         <meta property="og:image:alt" content={description} />
