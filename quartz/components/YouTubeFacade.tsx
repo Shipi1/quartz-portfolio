@@ -46,10 +46,14 @@ function facade(id: string, embedSrc: string, eager: boolean): Element {
         type: "element",
         tagName: "img",
         properties: {
-          src: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+          // 720p thumbnail. Only exists for videos uploaded in HD; otherwise
+          // YouTube returns a 120x90 placeholder and the script below swaps
+          // in data-fallback (480x360, always available).
+          src: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+          dataFallback: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
           alt: "",
-          width: 480,
-          height: 360,
+          width: 1280,
+          height: 720,
           decoding: "async",
           // the first video is usually on screen at load; defer the rest
           loading: eager ? "eager" : "lazy",
@@ -93,6 +97,27 @@ const FACADE_SCRIPT = `
 (function () {
   if (window.__ytFacadeInit) return
   window.__ytFacadeInit = true
+
+  // A missing 720p thumbnail comes back as a 120x90 placeholder (or an
+  // error). Swap to the always-available 480x360 one when that happens.
+  function fallbackIfMissing(img) {
+    if (!img || !img.dataset || !img.dataset.fallback) return
+    if (!img.closest("a.yt-facade")) return
+    var missing = img.complete && img.naturalWidth <= 120
+    if (!missing) return
+    img.src = img.dataset.fallback
+    delete img.dataset.fallback
+  }
+  function sweep() {
+    document.querySelectorAll("a.yt-facade img").forEach(fallbackIfMissing)
+  }
+  // load/error don't bubble, but capture sees them — this covers lazy
+  // thumbnails that load later as the visitor scrolls
+  document.addEventListener("load", function (e) { fallbackIfMissing(e.target) }, true)
+  document.addEventListener("error", function (e) { fallbackIfMissing(e.target) }, true)
+  // and these catch images that finished before this script ran
+  sweep()
+  document.addEventListener("nav", sweep)
 
   document.addEventListener("click", function (e) {
     var link = e.target && e.target.closest && e.target.closest("a.yt-facade")

@@ -295,5 +295,9 @@ How it fits together:
   working across SPA navigation.
 - Without JavaScript, or on ctrl/cmd/middle click, the thumbnail is a plain
   link that opens the video on YouTube in a new tab.
+- Thumbnails are the 720p `maxresdefault.jpg`. YouTube only has that for
+  videos uploaded in HD; for the rest it returns a 120x90 placeholder, which
+  the script detects (`naturalWidth <= 120`) and replaces with the 480x360
+  `hqdefault.jpg` kept in `data-fallback`.
 - Playlist embeds (`embed/videoseries?list=`) have no single thumbnail and are
   left as ordinary iframes.
