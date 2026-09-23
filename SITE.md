@@ -267,3 +267,33 @@ DNS at the registrar, for an apex domain:
 Confirm those addresses against GitHub's current Pages documentation before
 relying on them. Then set the domain under Settings → Pages, wait for the DNS
 check to pass, and enable "Enforce HTTPS" once the certificate is issued.
+
+## YouTube embeds are click-to-play
+
+`quartz/components/YouTubeFacade.tsx`. Markdown is unchanged — keep writing
+`![](https://www.youtube.com/watch?v=ID)`.
+
+A real YouTube iframe costs ~650 KB compressed (~2.4 MB of player JS/CSS
+unpacked) and starts downloading as soon as the HTML is parsed. Measured on the
+live site with four embeds, the page was usable in ~50 ms but not finished
+loading until 1.6–3.5 s, and the last iframe to finish was always what ended it.
+
+Each embed is now replaced at build time with a link holding the video's
+thumbnail and a play button. Clicking creates the real player
+(`youtube-nocookie.com`, `autoplay=1`) in the same 16:9 box, so nothing
+shifts. Measured after the change: full load 21–23 ms warm, ~500 ms cold, and
+the only YouTube request during page load is one thumbnail; the rest are
+`loading="lazy"`.
+
+How it fits together:
+
+- `PortfolioFrame.tsx` hands the page body a rewritten copy of the content tree
+  (`withYouTubeFacades`). It has to be build time — replacing iframes with JS
+  in the browser would be too late, since they start loading during parsing.
+  The original tree is cloned, not mutated, because other emitters read it.
+- The click handler is an inline script delegated on `document`, so it keeps
+  working across SPA navigation.
+- Without JavaScript, or on ctrl/cmd/middle click, the thumbnail is a plain
+  link that opens the video on YouTube in a new tab.
+- Playlist embeds (`embed/videoseries?list=`) have no single thumbnail and are
+  left as ordinary iframes.

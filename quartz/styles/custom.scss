@@ -235,3 +235,71 @@ body[data-slug^="blog/"] .content-meta {
     border-radius: 4px;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Click-to-play YouTube facades (quartz/components/YouTubeFacade.tsx).
+// Same footprint as the iframe it stands in for, so nothing shifts on click.
+// ---------------------------------------------------------------------------
+.page[data-frame="portfolio"] {
+  a.yt-facade {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin: 1rem 0 1.5rem 0;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #111;
+    cursor: pointer;
+
+    & img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      // hqdefault thumbnails are 4:3 with black bars; crop to the 16:9 frame
+      object-fit: cover;
+      transition: filter 0.2s ease;
+    }
+
+    &:hover img,
+    &:focus-visible img {
+      filter: brightness(0.75);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--secondary);
+      outline-offset: 3px;
+    }
+  }
+
+  .yt-facade-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 64px;
+    height: 64px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    transition: background-color 0.2s ease;
+
+    // triangle, nudged right so it looks optically centred
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 54%;
+      transform: translate(-50%, -50%);
+      border-style: solid;
+      border-width: 11px 0 11px 18px;
+      border-color: transparent transparent transparent #fff;
+    }
+  }
+
+  a.yt-facade:hover .yt-facade-play,
+  a.yt-facade:focus-visible .yt-facade-play {
+    background-color: var(--secondary);
+  }
+}

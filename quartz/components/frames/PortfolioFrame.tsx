@@ -5,6 +5,10 @@ import PortfolioNavConstructor from "../PortfolioNav"
 import PostListConstructor from "../PostList"
 import ClockConstructor from "../Clock"
 import OnekoConstructor from "../Oneko"
+import YouTubeFacadeConstructor, { withYouTubeFacades } from "../YouTubeFacade"
+import { Root } from "hast"
+
+const YouTubeFacadeScript = YouTubeFacadeConstructor()
 
 // ---------------------------------------------------------------------------
 // Site chrome. Edit these two constants to change the nav and the footer.
@@ -75,7 +79,11 @@ export const PortfolioFrame: PageFrame = {
           {beforeBody.map((BodyComponent) => (
             <BodyComponent {...componentData} />
           ))}
-          <Content {...componentData} />
+          {/* YouTube iframes are swapped for click-to-play thumbnails here */}
+          <Content
+            {...componentData}
+            tree={withYouTubeFacades(componentData.tree as Root)}
+          />
           {isBlogIndex && <PostList {...componentData} />}
           {afterBody.map((BodyComponent) => (
             <BodyComponent {...componentData} />
@@ -100,6 +108,7 @@ export const PortfolioFrame: PageFrame = {
           </p>
         </footer>
         {ONEKO_ENABLED && <Oneko {...componentData} />}
+        <YouTubeFacadeScript {...componentData} />
       </div>
     )
   },
