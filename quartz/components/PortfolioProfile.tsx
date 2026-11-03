@@ -3,7 +3,7 @@ import { QuartzComponent, QuartzComponentConstructor } from "./types"
 
 // Keep personal details together so this header is easy to update.
 export const profile = {
-  name: "Martin Arias",
+  name: "Martin Arias Herrera",
   role: "Sound Design & Audio Post Production",
   education: "Audio Engineering · Duoc UC Viña del Mar",
   email: "arias.martin1@gmail.com",
