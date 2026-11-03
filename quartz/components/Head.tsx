@@ -4,6 +4,7 @@ import { CSSResourceToStyleElement, JSResourceToScriptElement } from "../util/re
 import { googleFontHref, googleFontSubsetHref } from "../util/theme"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { unescapeHTML } from "../util/escape"
+import portfolioFonts from "./portfolio-fonts.json"
 
 export default (() => {
   const Head: QuartzComponent = ({
@@ -48,6 +49,11 @@ export default (() => {
       <head>
         <title>{title}</title>
         <meta charSet="utf-8" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("portfolio-theme");document.documentElement.setAttribute("saved-theme",t==="dark"||t==="light"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}`,
+          }}
+        />
         {coreStylesheet && <link rel="preload" href={coreStylesheet} as="style" />}
         {coreScript && coreScript.contentType === "external" && (
           <link rel="preload" href={coreScript.src} as="script" />
@@ -62,7 +68,23 @@ export default (() => {
             )}
           </>
         )}
-        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href={joinSegments(baseDir, "static/fonts/portfolio.css")}
+          data-persist="true"
+        />
+        {Object.entries(portfolioFonts)
+          .filter(([family]) => family !== "IBM Plex Mono")
+          .map(([, filename]) => (
+            <link
+              rel="preload"
+              href={joinSegments(baseDir, "static/fonts", filename)}
+              as="font"
+              type="font/woff2"
+              crossOrigin="anonymous"
+              data-persist="true"
+            />
+          ))}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <meta name="og:site_name" content={cfg.pageTitle}></meta>

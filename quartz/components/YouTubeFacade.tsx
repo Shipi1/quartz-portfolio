@@ -2,6 +2,8 @@ import { Element, Root } from "hast"
 import { visit } from "unist-util-visit"
 import { clone } from "../util/clone"
 import { QuartzComponent, QuartzComponentConstructor } from "./types"
+import { FullSlug, joinSegments, pathToRoot } from "../util/path"
+import localThumbnails from "./portfolio-thumbnails.json"
 
 /**
  * Click-to-play YouTube embeds.
@@ -28,7 +30,9 @@ function isYouTubeIframe(node: Element): boolean {
   return Array.isArray(cls) && cls.includes("youtube")
 }
 
-function facade(id: string, embedSrc: string, eager: boolean): Element {
+function facade(id: string, embedSrc: string, eager: boolean, base: string): Element {
+  const local = localThumbnails.includes(id)
+  const thumbnail = (width: number) => joinSegments(base, `static/thumbnails/${id}-${width}.webp`)
   return {
     type: "element",
     tagName: "a",
@@ -49,14 +53,17 @@ function facade(id: string, embedSrc: string, eager: boolean): Element {
           // 720p thumbnail. Only exists for videos uploaded in HD; otherwise
           // YouTube returns a 120x90 placeholder and the script below swaps
           // in data-fallback (480x360, always available).
-          src: `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
-          dataFallback: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+          src: local ? thumbnail(960) : `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+          srcSet: local ? `${thumbnail(480)} 480w, ${thumbnail(960)} 960w` : undefined,
+          sizes: local ? "(max-width: 640px) calc(100vw - 32px), 640px" : undefined,
+          dataFallback: local ? undefined : `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
           alt: "",
           width: 1280,
           height: 720,
           decoding: "async",
           // the first video is usually on screen at load; defer the rest
           loading: eager ? "eager" : "lazy",
+          fetchPriority: eager ? "high" : "low",
         },
         children: [],
       },
@@ -74,7 +81,7 @@ function facade(id: string, embedSrc: string, eager: boolean): Element {
  * Returns a copy of the page tree with YouTube iframes replaced by facades.
  * The original tree is left untouched, since other emitters also read it.
  */
-export function withYouTubeFacades(tree: Root): Root {
+export function withYouTubeFacades(tree: Root, slug: FullSlug = "index" as FullSlug): Root {
   const out = clone(tree)
   let count = 0
   visit(out, "element", (node: Element, index, parent) => {
@@ -83,7 +90,7 @@ export function withYouTubeFacades(tree: Root): Root {
     const id = src.match(VIDEO_ID)?.[1]
     // playlist embeds (embed/videoseries) have no single thumbnail: keep the iframe
     if (!id) return
-    parent.children[index] = facade(id, src, count === 0)
+    parent.children[index] = facade(id, src, count === 0, pathToRoot(slug))
     count++
   })
   return out
@@ -108,8 +115,23 @@ const FACADE_SCRIPT = `
     img.src = img.dataset.fallback
     delete img.dataset.fallback
   }
+  var observer
   function sweep() {
     document.querySelectorAll("a.yt-facade img").forEach(fallbackIfMissing)
+    if (observer) observer.disconnect()
+    if (!("IntersectionObserver" in window)) return
+    // Start downloads a screen or two ahead, retaining native lazy loading
+    // as a fallback when JavaScript is unavailable.
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return
+        entry.target.loading = "eager"
+        observer.unobserve(entry.target)
+      })
+    }, { rootMargin: "1200px 0px" })
+    document.querySelectorAll('a.yt-facade img[loading="lazy"]').forEach(function (img) {
+      observer.observe(img)
+    })
   }
   // load/error don't bubble, but capture sees them — this covers lazy
   // thumbnails that load later as the visitor scrolls

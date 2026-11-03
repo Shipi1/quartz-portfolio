@@ -2,6 +2,46 @@
 | `quartz/components/Head.tsx` | **Upstream file, 1 line changed.** Pins the tab title. |
 # Site notes
 
+Performance changes, measurements, and asset maintenance: [PERFORMANCE.md](PERFORMANCE.md).
+
+## Profile and theme
+
+The home-page profile lives in `quartz/components/PortfolioProfile.tsx`. Edit its
+`profile` object to change the name, subtitle, education, photo, email, GitHub,
+or LinkedIn. The current circular photo reuses a local thumbnail of the audio
+workstation; replace `profile.image` with another local asset when desired.
+The other pages keep their own titles and existing content.
+
+Colors in `quartz.config.yaml` follow the reference's warm light/navy theme and
+dark/blue theme. The button in the top bar switches themes and saves the choice
+per browser; the first visit follows the system preference. Profile layout and
+serif headings are styled in `quartz/styles/custom.scss`.
+
+The SPA router uses the browser's built-in animation API for a 300ms fade/slide
+on page entry and a 400ms moving active-menu underline. No animation package or
+additional runtime download is needed. Both respect `prefers-reduced-motion`.
+
+### Project labels
+
+Each video can have its own label: write a bold paragraph immediately before
+its YouTube embed in `content/index.md`. The first retains its existing label;
+the others currently say `Category to be defined`. A new entry without a label
+gets that same placeholder automatically. Labels are grouped with project titles
+at build time in `quartz/components/portfolioLayout.ts`.
+
+### Visitor map
+
+`quartz/components/visitor-map.json` contains the site's public MapMyVisitors
+widget ID. The map appears below the projects, with the total and geographic
+statistics supplied by that service. Its colors are set in `VisitorMap.tsx`
+from the theme active when the widget first loads. The widget is reused across
+SPA visits to Home instead of loading and counting repeatedly on navigation.
+
+Tracking loads during browser idle time on `shipisnature.com` and
+`www.shipisnature.com` only. Localhost shows an explicitly labeled preview with
+no invented counts or markers and does not contact the service. No historical
+visits can be reconstructed: real statistics begin once this version is deployed.
+
 A minimal personal site built on a fork of [Quartz v5](https://github.com/jackyzha0/quartz)
 (branch `v5`). Dark single-column layout, markdown content, no digital-garden chrome.
 

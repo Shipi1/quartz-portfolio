@@ -1,12 +1,12 @@
 @use "./variables.scss" as *;
 
 // ===========================================================================
-// Portfolio frame — a single narrow centered column on a dark ground.
+// Portfolio frame — a wide desktop canvas with a compact mobile layout.
 // Everything here is scoped to [data-frame="portfolio"] so the stock Quartz
 // frames keep working untouched.
 // ===========================================================================
 
-$columnWidth: 75ch;
+$columnWidth: 1280px;
 $accent: var(--secondary);
 
 .page[data-frame="portfolio"] {
@@ -17,7 +17,7 @@ $accent: var(--secondary);
     // last nav link off-screen on narrow displays.
     box-sizing: border-box;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 clamp(1rem, 4vw, 3rem);
     width: 100%;
     max-width: $columnWidth;
     min-height: 100vh;
@@ -301,5 +301,379 @@ body[data-slug^="blog/"] .content-meta {
   a.yt-facade:hover .yt-facade-play,
   a.yt-facade:focus-visible .yt-facade-play {
     background-color: var(--secondary);
+  }
+}
+
+// Reference-inspired profile: warm paper, navy accents, serif headings and
+// compact controls. Video order, proportions and project copy stay unchanged.
+.page[data-frame="portfolio"] {
+  font-family: "Source Sans Pro", system-ui, sans-serif;
+
+  .site-topbar {
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--lightgray);
+    background: var(--light);
+  }
+
+  .site-nav {
+    justify-content: flex-start;
+    gap: 0.25rem;
+
+    a {
+      position: relative;
+      padding: 0.7rem 0.8rem;
+      color: var(--gray);
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: color 160ms ease;
+
+      &:hover,
+      &[aria-current="page"] {
+        color: var(--dark);
+        text-decoration: none;
+      }
+    }
+  }
+
+  .nav-indicator {
+    position: absolute;
+    height: 2px;
+    bottom: 0;
+    left: 0.8rem;
+    right: 0.8rem;
+    border-radius: 2px;
+    background: var(--secondary);
+    transform-origin: left center;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid var(--lightgray);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--darkgray);
+    cursor: pointer;
+    transition: background-color 160ms ease;
+
+    &:hover {
+      background: var(--highlight);
+    }
+  }
+
+  .site-clock {
+    order: 2;
+    margin-right: 0;
+    font-size: 0.8rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: -0.025em;
+  }
+
+  .profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    padding: 0.75rem 0 2.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--lightgray);
+  }
+
+  .profile-photo {
+    flex: 0 0 144px;
+    width: 144px;
+    height: 144px;
+    margin: 0;
+    border-radius: 50%;
+    border: 1px solid var(--lightgray);
+    object-fit: cover;
+    object-position: 78% center;
+    content-visibility: visible;
+  }
+
+  .profile-details {
+    min-width: 0;
+  }
+
+  .profile-details h1 {
+    margin: 0 0 0.45rem;
+    font-size: clamp(2.25rem, 5vw, 3rem);
+    line-height: 1.12;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .profile-role {
+    margin: 0 0 0.4rem;
+    color: var(--secondary);
+    font:
+      500 1.2rem/1.4 Georgia,
+      "Times New Roman",
+      serif;
+  }
+
+  .profile-education {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--gray);
+  }
+
+  .profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.2rem;
+    align-items: center;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      height: 38px;
+      box-sizing: border-box;
+      border: 1px solid var(--lightgray);
+      color: var(--secondary);
+      background: transparent;
+      text-decoration: none;
+      transition:
+        transform 160ms ease,
+        background-color 160ms ease;
+
+      &:hover {
+        background: var(--highlight);
+        transform: translateY(-2px);
+      }
+    }
+
+    svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .profile-email {
+      padding: 0 1rem;
+      border-radius: 8px;
+      border-color: var(--secondary);
+      background: var(--secondary);
+      color: var(--light);
+      font-size: 0.9rem;
+      font-weight: 600;
+
+      &:hover {
+        background: var(--tertiary);
+      }
+    }
+
+    .profile-social {
+      width: 38px;
+      border-radius: 50%;
+    }
+  }
+
+  .portfolio-footer {
+    font-size: 0.8rem;
+  }
+
+  .project-label {
+    color: var(--gray);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+
+    p {
+      margin: 0;
+    }
+    strong {
+      font-weight: 500;
+    }
+  }
+
+  .visitor-map-panel {
+    margin-top: 1rem;
+    padding-top: 0;
+    text-align: center;
+
+    &[hidden],
+    [hidden] {
+      display: none !important;
+    }
+    h2 {
+      margin: 0 0 1.5rem;
+      font-size: 1.25rem;
+    }
+    img {
+      display: block;
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      margin: 0 auto;
+    }
+    .visitor-map-live {
+      max-width: 400px;
+      min-height: 240px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .visitor-map-preview + .visitor-map-live:empty {
+      display: none;
+    }
+  }
+
+  .visitor-map-count {
+    margin: 1rem 0 0.5rem;
+    color: var(--secondary);
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    span {
+      color: var(--gray);
+      font-size: 0.85rem;
+    }
+    .visitor-map-divider {
+      margin: 0 1rem;
+    }
+  }
+
+  .visitor-map-note {
+    margin: 0;
+    color: var(--gray);
+    font-size: 0.8rem;
+  }
+
+  .about-intro > h1,
+  .about-details > h2:first-child {
+    margin-top: 0;
+  }
+
+  .about-details {
+    margin-top: 2rem;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 560px) {
+    .profile-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+    .profile-photo {
+      flex-basis: auto;
+      width: 120px;
+      height: 120px;
+    }
+    .site-nav a {
+      padding-inline: 0.6rem;
+    }
+    .nav-indicator {
+      left: 0.6rem;
+      right: 0.6rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .profile-hero {
+      padding-top: 1.5rem;
+      padding-bottom: 3rem;
+      gap: 2rem;
+    }
+
+    .profile-photo {
+      flex-basis: 160px;
+      width: 160px;
+      height: 160px;
+    }
+
+    .profile-details h1 {
+      font-size: 3.5rem;
+    }
+
+    // Keep every project in its existing order. On desktop, use the width
+    // for a video plus its title/description, rather than an oversized player.
+    .project-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      column-gap: clamp(2rem, 4vw, 4rem);
+      align-items: center;
+
+      > p {
+        margin: 0;
+
+        > a.yt-facade,
+        > iframe.youtube {
+          margin: 0;
+        }
+      }
+
+      .project-copy > h2 {
+        margin: 0 0 1rem;
+        font-size: clamp(1.5rem, 2vw, 1.9rem);
+        line-height: 1.25;
+      }
+
+      .project-copy > h2 + p {
+        margin: 0;
+        color: var(--gray);
+        line-height: 1.65;
+      }
+    }
+
+    // Long biographies stay readable while the shared header fills the canvas.
+    .portfolio-main:not(:has(.profile-hero)) article {
+      max-width: 80ch;
+    }
+
+    .portfolio-about article {
+      max-width: none !important;
+    }
+
+    .portfolio-about .markdown-rendered {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 4rem);
+      align-items: start;
+    }
+
+    .about-intro,
+    .about-details {
+      min-width: 0;
+    }
+
+    .about-details {
+      margin-top: 0;
+      padding-left: 2rem;
+      border-left: 1px solid var(--lightgray);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-frame="portfolio"] {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 }

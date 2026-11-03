@@ -26,7 +26,7 @@ Audio Engineering — Duoc UC Viña del Mar, Chile.
 
 ## Employment
 
-Freelance Audio Designer
+Sound Design & Audio Post Intern @ Beepsonido
 
 ## Areas of Practice
 

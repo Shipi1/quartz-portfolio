@@ -7,17 +7,22 @@ import ClockConstructor from "../Clock"
 import OnekoConstructor from "../Oneko"
 import YouTubeFacadeConstructor, { withYouTubeFacades } from "../YouTubeFacade"
 import { Root } from "hast"
+import PortfolioProfileConstructor from "../PortfolioProfile"
+import { portfolioLayout } from "../portfolioLayout"
+import VisitorMapConstructor from "../VisitorMap"
 
 const YouTubeFacadeScript = YouTubeFacadeConstructor()
+const PortfolioProfile = PortfolioProfileConstructor()
+const VisitorMap = VisitorMapConstructor()
 
 // ---------------------------------------------------------------------------
 // Site chrome. Edit these two constants to change the nav and the footer.
 // ---------------------------------------------------------------------------
 const Nav = PortfolioNavConstructor({
   links: [
-    { title: "home", slug: "" },
-    { title: "about me", slug: "about" },
-    { title: "contact", slug: "contact" },
+    { title: "Home", slug: "" },
+    { title: "About me", slug: "about" },
+    { title: "Contact", slug: "contact" },
   ],
 })
 
@@ -66,28 +71,52 @@ export const PortfolioFrame: PageFrame = {
     const simplified = rawSimplified?.endsWith("/") ? rawSimplified.slice(0, -1) : rawSimplified
     const isBlogIndex = simplified === BLOG_FOLDER
     const showClock = simplified !== undefined && CLOCK_PAGES.includes(simplified)
+    const isHome = simplified === ""
 
     return (
       <div class="portfolio-shell">
         <div class="site-topbar">
           {showClock && <Clock {...componentData} />}
           <Nav {...componentData} />
+          <button
+            class="theme-toggle"
+            type="button"
+            aria-label="Switch color theme"
+            title="Switch color theme"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+            >
+              <path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z" />
+            </svg>
+          </button>
         </div>
         {/* the "center" class is load-bearing: some upstream component scripts
             (e.g. mermaid) do document.querySelector(".center") unguarded */}
-        <main class="center portfolio-main">
-          {beforeBody.map((BodyComponent) => (
+        <main class={`center portfolio-main${simplified === "about" ? " portfolio-about" : ""}`}>
+          {isHome && <PortfolioProfile {...componentData} />}
+          {(!isHome && simplified !== "about" ? beforeBody : []).map((BodyComponent) => (
             <BodyComponent {...componentData} />
           ))}
           {/* YouTube iframes are swapped for click-to-play thumbnails here */}
           <Content
             {...componentData}
-            tree={withYouTubeFacades(componentData.tree as Root)}
+            tree={portfolioLayout(
+              withYouTubeFacades(componentData.tree as Root, componentData.fileData.slug),
+              simplified ?? "",
+            )}
           />
           {isBlogIndex && <PostList {...componentData} />}
           {afterBody.map((BodyComponent) => (
             <BodyComponent {...componentData} />
           ))}
+          {isHome && <VisitorMap {...componentData} />}
         </main>
         <footer class="portfolio-footer">
           {footer.map((FooterComponent) => (

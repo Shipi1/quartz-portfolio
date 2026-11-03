@@ -1,6 +1,6 @@
 ---
 date created: 1788381248
-date modified: 1788407329
+date modified: 1793729788
 title: 🎧hi, im shipi's nature
 ---
 
@@ -16,6 +16,8 @@ title: 🎧hi, im shipi's nature
 
 ---
 
+**Sound Design**
+
 ![](https://www.youtube.com/watch?v=MRfCBpqWgOc)
 ## 02 Sound Re-design for a First-Person Shooter Videogame
 
@@ -23,12 +25,16 @@ title: 🎧hi, im shipi's nature
 
 ---
 
+**Sound Design & Audio Post**
+
 ![](https://www.youtube.com/watch?v=aS1vCettuCI)
 ## 03 Sound Design for an Animated Short Film
 
 *Sound direction, Sound Design, Foley and Mixing.*
 
 ---
+
+**Sound Design**
 
 ![](https://www.youtube.com/watch?v=POCH9jhv9XA)
 

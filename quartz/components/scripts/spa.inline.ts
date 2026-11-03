@@ -1,6 +1,59 @@
 import micromorph from "micromorph"
 import { FullSlug, RelativeURL, getFullSlug, normalizeRelativeURLs } from "../../util/path"
 import { fetchCanonical } from "./util"
+import { createPageCache } from "./pageCache"
+
+const getPage = createPageCache(async (url) => {
+  const res = await fetchCanonical(url)
+  if (!res.ok || !res.headers.get("content-type")?.startsWith("text/html")) {
+    throw new Error(`Cannot navigate to ${url}`)
+  }
+  return res.text()
+})
+
+function canPrefetch() {
+  const connection = (
+    navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string }
+    }
+  ).connection
+  return !connection?.saveData && !/^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+}
+
+function prefetchLink(link: HTMLAnchorElement) {
+  const url = new URL(link.href)
+  if (
+    !canPrefetch() ||
+    url.origin !== location.origin ||
+    isSamePage(url) ||
+    link.target ||
+    link.hasAttribute("download") ||
+    "routerIgnore" in link.dataset
+  )
+    return
+  return getPage(url).catch(() => {}) // A failed prefetch must never break a link.
+}
+
+function schedulePrefetch() {
+  const run = async () => {
+    // Only explicitly marked menu links, sequentially, after the initial render.
+    for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-prefetch]")) {
+      await prefetchLink(link)
+    }
+  }
+  setTimeout(() => {
+    if ("requestIdleCallback" in window) window.requestIdleCallback(() => void run())
+    else void run()
+  }, 750)
+}
+
+document.addEventListener("nav", schedulePrefetch)
+for (const eventName of ["pointerover", "focusin"]) {
+  document.addEventListener(eventName, (event) => {
+    const link = (event.target as Element)?.closest<HTMLAnchorElement>("a[data-prefetch]")
+    if (link) void prefetchLink(link)
+  })
+}
 
 // adapted from `micromorph`
 // https://github.com/natemoo-re/micromorph
@@ -26,19 +79,49 @@ const isSamePage = (url: URL): boolean => {
 
 const getOpts = ({ target }: Event): { url: URL; scroll?: boolean } | undefined => {
   if (!isElement(target)) return
-  if (target.attributes.getNamedItem("target")?.value === "_blank") return
   const a = target.closest("a")
   if (!a) return
+  if (a.target || a.hasAttribute("download")) return
   if ("routerIgnore" in a.dataset) return
   const { href } = a
   if (!isLocalUrl(href)) return
   return { url: new URL(href), scroll: "routerNoscroll" in a.dataset ? false : undefined }
 }
 
-function notifyNav(url: FullSlug) {
+function notifyNav(url: FullSlug, previousIndicator?: DOMRect) {
   const event: CustomEventMap["nav"] = new CustomEvent("nav", { detail: { url } })
   document.dispatchEvent(event)
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return
+  document.querySelector(".portfolio-main")?.animate(
+    [
+      { opacity: 0, transform: "translateY(10px)" },
+      { opacity: 1, transform: "translateY(0)" },
+    ],
+    { duration: 300, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+  )
+  const indicator = document.querySelector(".nav-indicator")
+  if (indicator && previousIndicator) {
+    const next = indicator.getBoundingClientRect()
+    indicator.animate(
+      [
+        {
+          transform: `translateX(${previousIndicator.left - next.left}px) scaleX(${previousIndicator.width / next.width})`,
+        },
+        { transform: "translateX(0) scaleX(1)" },
+      ],
+      { duration: 400, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    )
+  }
 }
+
+document.addEventListener("click", (event) => {
+  if (!(event.target as Element)?.closest(".theme-toggle")) return
+  const theme = document.documentElement.getAttribute("saved-theme") === "dark" ? "light" : "dark"
+  document.documentElement.setAttribute("saved-theme", theme)
+  try {
+    localStorage.setItem("portfolio-theme", theme)
+  } catch {}
+})
 
 const cleanupFns: Set<(...args: any[]) => void> = new Set()
 window.addCleanup = (fn) => cleanupFns.add(fn)
@@ -68,20 +151,12 @@ async function _navigate(url: URL, isBack: boolean = false) {
   isNavigating = true
   startLoading()
   p = p || new DOMParser()
-  const contents = await fetchCanonical(url)
-    .then((res) => {
-      const contentType = res.headers.get("content-type")
-      if (contentType?.startsWith("text/html")) {
-        return res.text()
-      } else {
-        window.location.assign(url)
-      }
-    })
-    .catch(() => {
-      window.location.assign(url)
-    })
+  const contents = await getPage(url).catch(() => {
+    window.location.assign(url)
+  })
 
   if (!contents) return
+  const previousIndicator = document.querySelector(".nav-indicator")?.getBoundingClientRect()
 
   // notify about to nav
   const event: CustomEventMap["prenav"] = new CustomEvent("prenav", { detail: {} })
@@ -132,7 +207,7 @@ async function _navigate(url: URL, isBack: boolean = false) {
     history.pushState({}, "", url)
   }
 
-  notifyNav(getFullSlug(window))
+  notifyNav(getFullSlug(window), previousIndicator)
   delete announcer.dataset.persist
 }
 
@@ -157,7 +232,16 @@ function createRouter() {
     window.addEventListener("click", async (event) => {
       const { url } = getOpts(event) ?? {}
       // dont hijack behaviour, just let browser act normally
-      if (!url || event.ctrlKey || event.metaKey) return
+      if (
+        !url ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return
       event.preventDefault()
 
       if (isSamePage(url) && url.hash) {

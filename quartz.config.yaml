@@ -19,19 +19,26 @@ configuration:
       body: Source Sans Pro
       code: IBM Plex Mono
     colors:
-      # single dark palette, duplicated so the site looks identical
-      # whether or not a visitor prefers light mode
-      lightMode: &palette
-        light: "#000000"
-        lightgray: "#1e1e1e"
-        gray: "#8a8a8a"
-        darkgray: "#ffffff"
-        dark: "#ffffff"
-        secondary: "#f895ea"
-        tertiary: "#da6bcb"
-        highlight: rgba(248, 149, 234, 0.10)
-        textHighlight: "#f895ea55"
-      darkMode: *palette
+      lightMode:
+        light: "#faf9f7"
+        lightgray: "#d8d3cb"
+        gray: "#6b7280"
+        darkgray: "#1a1a2e"
+        dark: "#1a1a2e"
+        secondary: "#1a365d"
+        tertiary: "#2a4a7f"
+        highlight: rgba(26, 54, 93, 0.08)
+        textHighlight: "#1a365d22"
+      darkMode:
+        light: "#0d1117"
+        lightgray: "#30363d"
+        gray: "#8b949e"
+        darkgray: "#e6edf3"
+        dark: "#e6edf3"
+        secondary: "#60a5fa"
+        tertiary: "#93bbfd"
+        highlight: rgba(96, 165, 250, 0.10)
+        textHighlight: "#60a5fa33"
 
 plugins:
   # ---------- transformers (markdown -> html) ----------
@@ -57,6 +64,8 @@ plugins:
     options:
       enableInHtmlEmbed: false
       enableCheckbox: true
+      # This portfolio has no diagrams; avoid shipping their runtime and styles.
+      mermaid: false
     order: 30
   - source: "@quartz-community/github-flavored-markdown"
     enabled: true
@@ -71,7 +80,7 @@ plugins:
     enabled: true
     order: 70
   - source: "@quartz-community/latex"
-    enabled: true
+    enabled: false
     options:
       renderEngine: katex
     order: 80
@@ -93,6 +102,9 @@ plugins:
   # ---------- filters / emitters ----------
   - source: "@quartz-community/quartz-fonts"
     enabled: true
+    options:
+      # Font faces are vendored in quartz/static/fonts, not fetched at runtime.
+      fontOrigin: local
   - source: "@quartz-community/remove-draft"
     enabled: true
   - source: "@quartz-community/explicit-publish"
