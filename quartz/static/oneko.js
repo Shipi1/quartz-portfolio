@@ -180,6 +180,20 @@
     idleAnimationFrame = 0;
   }
 
+  // Reuse the sprite sheet for a short trail; no extra images or timers.
+  function leaveTrail() {
+    const ghost = nekoEl.cloneNode(false);
+    ghost.removeAttribute("id");
+    ghost.className = "oneko-trail";
+    ghost.style.zIndex = 2147483646;
+    document.body.appendChild(ghost);
+    const fade = ghost.animate(
+      [{ opacity: 0.16 }, { opacity: 0 }],
+      { duration: 250, easing: "ease-out", fill: "forwards" },
+    );
+    fade.onfinish = () => ghost.remove();
+  }
+
   function idle() {
     idleTime += 1;
 
@@ -265,6 +279,7 @@
     direction += diffX / distance < -0.5 ? "E" : "";
     setSprite(direction, frameCount);
 
+    leaveTrail();
     nekoPosX -= (diffX / distance) * nekoSpeed;
     nekoPosY -= (diffY / distance) * nekoSpeed;
 

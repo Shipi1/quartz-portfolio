@@ -45,7 +45,7 @@ export default (() => {
     return (
       <>
         <script
-          src={joinSegments(base, "static/oneko.js")}
+          src={`${joinSegments(base, "static/oneko.js")}?v=trail-3`}
           data-cat={joinSegments(base, "static/oneko.gif")}
         ></script>
         <script dangerouslySetInnerHTML={{ __html: ONEKO_SPA_FIX }} />
